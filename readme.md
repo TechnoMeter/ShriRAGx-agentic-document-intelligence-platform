@@ -25,9 +25,11 @@
 
 ---
 
-![alt text](image.png)
+![Main UI](docs/image.png)
 
+![Document Library](docs/image-1.png)
 
+![Manual](docs/image-2.png)
 
 
 ## 🌐 Live Demo & Hosting
@@ -260,7 +262,7 @@ apt install docker.io docker-compose -y
 
 **Step 3: Clone and Configure**
 ```bash
-git clone [https://github.com/yourusername/agentic-document-intelligence.git](https://github.com/yourusername/agentic-document-intelligence.git)
+git clone [https://github.com/TechnoMeter/agentic-document-intelligence-platform.git](https://github.com/TechnoMeter/agentic-document-intelligence-platform.git)
 cd agentic-document-intelligence
 ```
 * Create your `.env` file in the `backend` directory exactly as shown in the Local Setup step.
