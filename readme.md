@@ -1,7 +1,6 @@
 <div align="center">
   <!-- Status & License Badges -->
   <img src="https://img.shields.io/badge/Status-Active-success.svg?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/Deployed-DigitalOcean-0080FF.svg?style=for-the-badge&logo=digitalocean&logoColor=white" alt="DigitalOcean">
   
   <br><br>
@@ -17,8 +16,8 @@
   
   <br><br>
   
-  <h1>🧠 Agentic Document Intelligence Platform</h1>
-  <p><strong>A production-grade, asynchronous RAG architecture powered by LangGraph, Local Edge Embeddings, and the Model Context Protocol (MCP).</strong></p>
+<h1>🧠 Agentic Document Intelligence Platform</h1>
+  <p><strong>A production-grade, asynchronous RAG architecture powered by LangGraph, Local Edge Embeddings, and Native Tool Orchestration.</strong></p>
 </div>
 
 <br />
@@ -35,13 +34,13 @@
 ## 🌐 Live Demo & Hosting
 
 This project is actively hosted and available for testing. 
-The infrastructure is provisioned on a **DigitalOcean Droplet**, utilizing the $200 infrastructure credit provided by the GitHub Student Developer Pack.
+The infrastructure is containerized and provisioned on a **DigitalOcean Droplet**.
 
-👉 **[Access the Live Platform Here] (Insert Your URL/IP Here)** *(Note: The demo instance uses lightweight edge-embeddings to minimize memory footprint on the cloud server. Uploaded files are cleared on a rolling 24-hour basis).*
+👉 **[Access the Live Platform Here](https://shriram.is-a.dev)** *(Note: The demo instance uses lightweight edge-embeddings to minimize memory footprint on the cloud server. Uploaded files are cleared on a rolling 24-hour basis).*
 
 ---
 
-## 📖 The "What" and "Why" (ELI5)
+## 📖 The "What" and "Why"
 
 ### The Problem with Standard AI Chatbots
 Traditional RAG (Retrieval-Augmented Generation) applications are "dumb pipes." When you ask a question, they blindly convert your text into numbers (vectors), search a database for similar numbers, stuff all the resulting text into an LLM, and hope the model figures it out. This approach fails spectacularly on basic administrative queries (e.g., *"How many documents do I have?"* or *"Delete the old Q3 report and summarize the remaining ones"*).
@@ -61,8 +60,8 @@ The ingestion pipeline natively parses and vectorizes a wide array of document t
 
 
 ### Engineering Motivations
-1. **Cost & Latency Elimination:** We generate text embeddings *locally* via the `sentence-transformers` library and HuggingFace models. We completely bypass the OpenAI/Google embedding APIs, saving money and avoiding network bottlenecks during large file ingestion.
-2. **Zero-Latency UX:** Large AI reasoning loops take time. By utilizing a custom **Server-Sent Events (SSE)** pipeline, the AI's internal "thoughts" (tool selections) and generation tokens are streamed directly to the React UI in real-time. No loading spinners; instant feedback.
+1. **Cost & Latency Elimination:** We generate text embeddings *locally* via the `sentence-transformers` library and HuggingFace models. We bypass embedding APIs, avoiding network bottlenecks during large file ingestion.
+2. **Low-Latency UX:** Large AI reasoning loops take time. By utilizing a custom **Server-Sent Events (SSE)** pipeline, the AI's internal "thoughts" (tool selections) and generation tokens are streamed directly to the React UI in real-time. No loading spinners; rapid feedback.
 
 ---
 
@@ -84,7 +83,7 @@ graph TD
     API["FastAPI Gateway<br/>(Async HTTP + SSE Stream)"]:::backend
     Worker["Ingestion Pipeline<br/>(Threaded Text Chunking)"]:::backend
     LangGraph["LangGraph State Machine<br/>(ReAct Orchestrator)"]:::agent
-    MCPServer["System Tool Node<br/>(SQL Provider)"]:::backend
+    ToolNode["System Tool Node<br/>(SQL Provider)"]:::backend
     
     VectorDB[("ChromaDB<br/>(Semantic Vectors)")]:::db
     SQL[("PostgreSQL<br/>(ACID Metadata)")]:::db
@@ -103,8 +102,8 @@ graph TD
     
     %% Agent Tool Calls
     LangGraph <-->|D. RAG Similarity Search| VectorDB
-    LangGraph <-->|E. Protocol Query| MCPServer
-    MCPServer <-->|F. Secure DB Read/Write| SQL
+    LangGraph <-->|E. Protocol Query| ToolNode
+    ToolNode <-->|F. Secure DB Read/Write| SQL
     
     %% Streaming Response
     LangGraph -. "G. Yield Event Stream" .-> API
@@ -239,47 +238,6 @@ npm install
 npm run dev
 ```
 *The Vite server will start on `http://localhost:5173` and automatically proxy API calls to port `8000`.*
-
----
-
-## ☁️ DigitalOcean Deployment Guide
-
-This platform is architected to run seamlessly on a DigitalOcean Droplet. Using your $200 GitHub Student Developer Pack credit, you can host this live for months at zero cost.
-
-**Step 1: Provision the Droplet**
-1. Log into DigitalOcean and create a new Droplet.
-2. Choose **Ubuntu 24.04 (LTS)**.
-3. Select a Basic Plan (A $12-$24/mo plan with 2GB-4GB RAM is recommended. While embeddings are processed asynchronously, native extraction of large `.xlsx` or `.epub` files can temporarily spike memory usage).
-4. Add your SSH keys for secure access.
-
-**Step 2: Server Setup**
-SSH into your droplet and install Docker:
-```bash
-ssh root@your_droplet_ip
-apt update && apt upgrade -y
-apt install docker.io docker-compose -y
-```
-
-**Step 3: Clone and Configure**
-```bash
-git clone [https://github.com/TechnoMeter/agentic-document-intelligence-platform.git](https://github.com/TechnoMeter/agentic-document-intelligence-platform.git)
-cd agentic-document-intelligence
-```
-* Create your `.env` file in the `backend` directory exactly as shown in the Local Setup step.
-* *Crucial Step:* In `frontend/.env.production`, ensure you set `VITE_API_URL=http://<YOUR_DROPLET_IP>:8000` so the compiled React app knows where to send requests.
-
-**Step 4: Build and Deploy**
-Compile the frontend and spin up the backend containers:
-```bash
-# Build frontend static files (optional, can also be served via Nginx)
-cd frontend && npm install && npm run build
-
-# Start the Backend Services
-cd ../backend
-docker-compose up --build -d
-```
-
-*(For production security, it is highly recommended to place an NGINX reverse proxy in front of the FastAPI app and secure it with a free Certbot/Let's Encrypt SSL certificate).*
 
 ---
 
