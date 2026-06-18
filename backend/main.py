@@ -45,7 +45,6 @@ class ChatRequest(BaseModel):
 async def stream_agent_response(message: str):
     initial_state = {"messages": [HumanMessage(content=message)]}
     try:
-        final_content = ""
         has_streamed = False
 
         # Stream all events from the LangGraph execution
@@ -82,10 +81,6 @@ async def stream_agent_response(message: str):
                 tool_name = event.get("name", "unknown_tool")
                 yield f"data: {json.dumps({'thought': f'Tool {tool_name} execution complete. Synthesizing data...'})}\n\n"
 
-        # Fallback if non-streaming response occurred
-        if not has_streamed and final_content:
-            yield f"data: {json.dumps({'token': final_content})}\n\n"
-            
         yield f"data: {json.dumps({'done': True})}\n\n"
         
     except Exception as e:
@@ -158,8 +153,10 @@ async def get_all_documents():
 async def get_document_chunks(filename: str):
     try:
         vector_store = get_vector_store()
-        results = vector_store._collection.get(where={"source": filename}, limit=3)
-        return {"chunks": results.get("documents", [])}
+        # Use public similarity_search instead of internal _collection
+        results = vector_store.similarity_search("", k=3, filter={"source": filename})
+        chunks = [doc.page_content for doc in results]
+        return {"chunks": chunks}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -173,6 +170,10 @@ async def toggle_document(doc_id: int, request: dict):
     try:
         with get_db_connection() as conn:
             cur = conn.cursor()
+            # For PostgreSQL, add row-level locking to prevent race conditions
+            if USE_POSTGRES:
+                # Lock the row before updating
+                cur.execute("SELECT is_active FROM documents WHERE id = %s FOR UPDATE", (doc_id,))
             query = "UPDATE documents SET is_active = %s WHERE id = %s" if USE_POSTGRES else "UPDATE documents SET is_active = ? WHERE id = ?"
             cur.execute(query, (is_active, doc_id))
             conn.commit()

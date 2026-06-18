@@ -1,4 +1,3 @@
-
 import os
 from typing import TypedDict, Annotated, Sequence
 from langchain_core.messages import BaseMessage, SystemMessage
@@ -70,18 +69,28 @@ You have access to tools to search document contents and retrieve system metadat
 Always use the provided tools to answer questions about uploaded files. 
 Synthesize the information cleanly using standard Markdown formatting. Do not hallucinate data."""
 
+def initialize_state(state: AgentState) -> dict:
+    """Inject the system prompt only once at the start of the conversation."""
+    # Check if system message already present
+    if not any(isinstance(m, SystemMessage) for m in state["messages"]):
+        return {"messages": [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]}
+    return {}
+
 async def agent_node(state: AgentState) -> dict:
-    messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
+    # System message is already in the state; just pass the messages
+    messages = state["messages"]
     response = await llm_with_tools.ainvoke(messages)
     return {"messages": [response]}
 
 workflow = StateGraph(AgentState)
+workflow.add_node("init", initialize_state)
 workflow.add_node("agent", agent_node)
 
 tool_node = ToolNode(tools)
 workflow.add_node("tools", tool_node)
 
-workflow.set_entry_point("agent")
+workflow.set_entry_point("init")
+workflow.add_edge("init", "agent")
 workflow.add_conditional_edges("agent", tools_condition)
 workflow.add_edge("tools", "agent")
 

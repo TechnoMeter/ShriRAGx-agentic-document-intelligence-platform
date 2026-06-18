@@ -1,4 +1,3 @@
-
 import pytest
 import requests
 import time
@@ -20,11 +19,12 @@ def test_document():
         resp = requests.post(f"{BASE_URL}/api/v1/upload", files=files)
         assert resp.status_code == 202, f"Upload failed: {resp.text}"
     
-    # FIX: Poll for the specific test document in the DB to ensure background task finished
+    # Poll for the specific test document in the DB using the structured /documents endpoint
     for _ in range(15):
-        recent_resp = requests.get(f"{BASE_URL}/api/v1/tools/recent_documents?limit=50")
-        if recent_resp.status_code == 200:
-            if TEST_DOC in recent_resp.json().get("result", ""):
+        docs_resp = requests.get(f"{BASE_URL}/api/v1/documents")
+        if docs_resp.status_code == 200:
+            docs = docs_resp.json().get("documents", [])
+            if any(doc["filename"] == TEST_DOC for doc in docs):
                 break
         time.sleep(1)
     
@@ -34,9 +34,10 @@ def test_document():
         os.remove(TEST_DOC)
 
 def test_upload(test_document):
-    recent = requests.get(f"{BASE_URL}/api/v1/tools/recent_documents?limit=50")
-    assert recent.status_code == 200
-    assert TEST_DOC in recent.json().get("result", "")
+    resp = requests.get(f"{BASE_URL}/api/v1/documents")
+    assert resp.status_code == 200
+    docs = resp.json().get("documents", [])
+    assert any(doc["filename"] == TEST_DOC for doc in docs)
 
 def test_chat(test_document):
     payload = {"message": f"What is the {TEST_DOC} document about?"}

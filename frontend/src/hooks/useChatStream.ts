@@ -1,4 +1,3 @@
-// src/hooks/useChatStream.ts
 import { useChatStore } from '@/store/chatStore';
 import { api } from '@/lib/api';
 
@@ -26,6 +25,7 @@ export function useChatStream() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let chunkBuffer = '';
+      let receivedDone = false;
 
       while (true) {
         const { value, done } = await reader.read();
@@ -50,6 +50,7 @@ export function useChatStream() {
               } else if (eventData.error) {
                 updateLastMessageToken(`\n[Agent Error: ${eventData.error}]`, false);
               } else if (eventData.done) {
+                receivedDone = true;
                 updateLastMessageToken('', false);
               }
             } catch (err) {
@@ -57,6 +58,11 @@ export function useChatStream() {
             }
           }
         }
+      }
+
+      // If the stream ended without a 'done' event, signal an interruption
+      if (!receivedDone) {
+        updateLastMessageToken('\n[Connection interrupted – incomplete response]', false);
       }
     } catch (err: any) {
       console.error(err);
