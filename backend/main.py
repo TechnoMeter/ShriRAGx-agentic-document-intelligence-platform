@@ -14,6 +14,10 @@ from app.agent.graph import app_agent
 from app.database import get_db_connection, USE_POSTGRES
 from app.services.vector_store import get_vector_store
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
 load_dotenv()
 
 logging.basicConfig(
@@ -248,3 +252,17 @@ async def tool_document_info(filename: str):
         return {"result": f"No document named '{filename}' found."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+    # ----- React Frontend Hosting -----
+    # 1. Mount the static assets (CSS/JS)
+app.mount("/assets", StaticFiles(directory="dist/assets"), name="assets")
+
+# 2. Catch-all route to serve the React index.html
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    # If the user asks for a specific file that exists in the root of dist
+    if os.path.exists(f"dist/{full_path}") and full_path != "":
+        return FileResponse(f"dist/{full_path}")
+    # Otherwise, return the main React app
+    return FileResponse("dist/index.html")

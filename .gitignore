@@ -36,7 +36,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -89,7 +88,6 @@ out/
 .turbo/
 
 # Vite build outputs
-dist/
 dist-ssr/
 *.local
 
