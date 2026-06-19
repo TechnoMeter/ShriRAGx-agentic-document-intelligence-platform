@@ -1,7 +1,7 @@
 <div align="center">
   <!-- Status & License Badges -->
   <img src="https://img.shields.io/badge/Status-Active-success.svg?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/badge/Deployed-DigitalOcean-0080FF.svg?style=for-the-badge&logo=digitalocean&logoColor=white" alt="DigitalOcean">
+  <img src="https://img.shields.io/badge/Deployed-Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white" alt="Microsoft Azure">
   
   <br><br>
 
@@ -34,9 +34,9 @@
 ## 🌐 Live Demo & Hosting
 
 This project is actively hosted and available for testing. 
-The infrastructure is containerized and provisioned on a **DigitalOcean Droplet**.
+The infrastructure is containerized and provisioned on a **Microsoft Azure B-Series Virtual Machine**.
 
-👉 **[Access the Live Platform Here](https://shriram.is-a.dev)** *(Note: The demo instance uses lightweight edge-embeddings to minimize memory footprint on the cloud server. Uploaded files are cleared on a rolling 24-hour basis).*
+👉 **[Access the Live Platform Here](https://shriram.is-a.dev)** *(Note: The demo instance uses lightweight edge-embeddings and virtual swap memory allocations to minimize the physical RAM footprint on the cloud server. Uploaded files are cleared on a rolling 24-hour basis).*
 
 ---
 
