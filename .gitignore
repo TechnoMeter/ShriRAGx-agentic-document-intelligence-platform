@@ -117,6 +117,7 @@ postgres_data/
 *.env
 !.env.example
 *.pem
+*.ssh_priv
 
 # ==========================================
 # Logs and Diagnostics
