@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'   # Updated to Node.js 22 (LTS)
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -29,7 +29,7 @@ jobs:
       - name: Build frontend
         working-directory: ./frontend
         run: |
-          npm ci --only=production
+          npm ci          # Install ALL dependencies (including dev)
           npm run build
 
       # 4. Copy the built dist folder to the Azure VM via SCP
@@ -42,8 +42,6 @@ jobs:
           source: "frontend/dist"
           target: "~/agentic-document-intelligence-platform/backend"
           overwrite: true
-          # This copies frontend/dist to ~/agentic-document-intelligence-platform/backend/frontend/dist
-          # We'll move it in the SSH step below, or adjust the target.
 
       # 5. Deploy backend with Docker
       - name: Deploy backend via SSH
@@ -57,12 +55,11 @@ jobs:
             cd ~/agentic-document-intelligence-platform/backend
 
             # Move the copied dist folder to the correct location
-            # (SCP puts it in backend/frontend/dist, but we need backend/dist)
             if [ -d "frontend/dist" ]; then
               echo "Moving frontend/dist to backend/dist..."
               rm -rf dist
               mv frontend/dist dist
-              rmdir frontend 2>/dev/null || true  # Clean up empty frontend folder
+              rmdir frontend 2>/dev/null || true
             else
               echo "WARNING: frontend/dist not found. Using existing dist if present."
             fi
