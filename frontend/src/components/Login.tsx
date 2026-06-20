@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Database, Shield, Clock, Info, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useChatStore } from '@/store/chatStore'; 
+import React, { useState, useEffect } from 'react';
+import { Database, Shield, Clock, Info, Eye, EyeOff, Loader2, User } from 'lucide-react';
+import { useChatStore } from '@/store/chatStore';
+import { getProfiles, addProfile, Profile } from '@/lib/utils';   // new helper
 
 async function hashCredentials(username: string, password: string): Promise<string> {
   const combined = username + password;
@@ -19,7 +20,13 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('');
   const [error, setError] = useState('');
-  const setSessionId = useChatStore((state: any) => state.setSessionId);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const setSession = useChatStore((state) => state.setSession);
+
+  // Load profiles on mount
+  useEffect(() => {
+    setProfiles(getProfiles());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,54 +38,53 @@ export function Login() {
       setError('Workspace ID and Access Key must be at least 3 characters.');
       return;
     }
-    
+
     setIsLoading(true);
     setError('');
-    
+
     try {
-      // Step 1: Hashing state
       setLoadingStatus('Hashing credentials locally...');
       const sessionIdPromise = hashCredentials(username.trim(), password.trim());
-      await new Promise(resolve => setTimeout(resolve, 700)); // Artificial delay for UX
-      
-      // Step 2: Provisioning & Network Check
+      await new Promise(resolve => setTimeout(resolve, 700));
+
       setLoadingStatus('Allocating secure sandbox...');
-      
-      // Ping the backend to ensure it's online before letting the user in
-      try {
-        // We ping a common FastAPI endpoint. 
-        // Even if it returns 404 Not Found, the server is UP. 
-        // If it returns 5xx (Gateway timeout) or fails entirely, the server is DOWN.
-        const res = await fetch('/api/docs', { method: 'HEAD' });
-        if (!res.ok && res.status >= 500) {
-          throw new Error('Server returned a Gateway Error.');
-        }
-      } catch (networkError) {
-        throw new Error('Backend server is offline or unreachable. Please check your connection.');
+      // Ping backend to ensure it's online
+      const res = await fetch('/api/docs', { method: 'HEAD' });
+      if (!res.ok && res.status >= 500) {
+        throw new Error('Server returned a Gateway Error.');
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 400)); // Artificial delay for UX
-      
-      // Step 3: Finalizing
+      await new Promise(resolve => setTimeout(resolve, 400));
+
       setLoadingStatus('Finalizing workspace...');
-      await new Promise(resolve => setTimeout(resolve, 500)); // Artificial delay for UX
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const sessionId = await sessionIdPromise;
-      setSessionId(sessionId);
-      
-      // Clear form and stop loading on success
+
+      // Save profile to localStorage
+      addProfile({ username: username.trim(), sessionId });
+      // Update the local profiles list
+      setProfiles(getProfiles());
+
+      // Set session in store (which also saves to localStorage)
+      setSession(username.trim(), sessionId);
+
+      // Clear form (optional, but will be unmounted anyway)
       setUsername('');
       setPassword('');
-      setIsLoading(false); // Prevents infinite spinning if routing doesn't immediately unmount the component
-      
+      setIsLoading(false);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('An error occurred during session creation. Please try again.');
       }
-      setIsLoading(false); // Stop the spinner so the error is visible
+      setIsLoading(false);
     }
+  };
+
+  const handleProfileClick = (profile: Profile) => {
+    // Just set the session – this will redirect to main app
+    setSession(profile.username, profile.sessionId);
   };
 
   return (
@@ -93,7 +99,27 @@ export function Login() {
           <p className="text-sm text-blue-100/70">Secure, ephemeral document intelligence</p>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-900/40 border border-blue-400/30 rounded-xl flex items-start gap-3 text-sm text-blue-100/90 shadow-inner">
+        {/* Recent Profiles */}
+        {profiles.length > 0 && (
+          <div className="mt-6">
+            <p className="text-xs font-medium text-blue-200/60 uppercase tracking-wider mb-2">Return to your session</p>
+            <div className="flex flex-wrap gap-2">
+              {profiles.map((profile) => (
+                <button
+                  key={profile.sessionId}
+                  onClick={() => handleProfileClick(profile)}
+                  className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm text-white transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                >
+                  <User className="w-4 h-4" />
+                  {profile.username}
+                </button>
+              ))}
+            </div>
+            <hr className="border-white/10 my-4" />
+          </div>
+        )}
+
+        <div className="mt-4 p-4 bg-blue-900/40 border border-blue-400/30 rounded-xl flex items-start gap-3 text-sm text-blue-100/90 shadow-inner">
           <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
           <div className="text-left">
             <p className="font-semibold text-white mb-1">No registration required.</p>

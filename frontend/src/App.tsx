@@ -5,20 +5,37 @@ import { DocumentSidebar } from '@/components/DocumentSidebar';
 import { DocumentLibrary } from '@/components/DocumentLibrary';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore } from '@/store/chatStore';
-import { Database, MessageSquare, BookOpen, Layers, Menu, X } from 'lucide-react';
+import { Database, MessageSquare, BookOpen, Layers, Menu, X, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Login } from '@/components/Login';
 import { api } from '@/lib/api';
 
 function App() {
-  const { currentView, setView, isMobileMenuOpen, setMobileMenuOpen, sessionId, setMessages, addMessage } = useChatStore();
+  const {
+    currentView, setView, isMobileMenuOpen, setMobileMenuOpen,
+    sessionId, username, setSession, logout, setMessages, addMessage
+  } = useChatStore();
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('current_session');
+    if (stored) {
+      try {
+        const { username, sessionId } = JSON.parse(stored);
+        if (username && sessionId) {
+          setSession(username, sessionId);
+        }
+      } catch (e) {
+        console.warn('Invalid stored session, ignoring.');
+      }
+    }
+  }, [setSession]);
 
   // Load chat history when sessionId becomes available
   useEffect(() => {
     if (sessionId) {
       api.getChatHistory(sessionId)
         .then(history => {
-          // Replace current messages with history (clear first)
           setMessages([]);
           history.forEach(msg => {
             addMessage({ role: msg.role as 'user' | 'assistant', content: msg.content });
@@ -63,13 +80,24 @@ function App() {
       )}>
         <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none" />
         
-        <div className="hidden md:flex p-6 border-b border-white/10 relative z-10">
-          <div className="flex items-center gap-3 text-white">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-b from-blue-300 to-blue-600 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),_0_0_15px_rgba(59,130,246,0.6)] border border-white/40">
+        {/* ---------- Desktop Header (now shows username) ---------- */}
+        <div className="hidden md:flex items-center justify-between p-4 border-b border-white/10 relative z-10">
+          <div className="flex items-center gap-3 text-white min-w-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-b from-blue-300 to-blue-600 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),_0_0_15px_rgba(59,130,246,0.6)] border border-white/40 shrink-0">
               <Database className="w-4 h-4 text-white drop-shadow-md" />
             </div>
-            <h1 className="font-bold text-base tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-white/95">ShriRAGx</h1>
+            <div className="truncate">
+              <h1 className="font-bold text-base tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-white/95">ShriRAGx</h1>
+              <p className="text-xs text-blue-200/60 truncate">{username}</p>
+            </div>
           </div>
+          <button 
+            onClick={logout}
+            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors shrink-0 ml-2"
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
         
         <ScrollArea className="flex-1 px-3 py-4 relative z-10">
