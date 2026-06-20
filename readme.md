@@ -28,10 +28,6 @@
 
 ![Main UI](docs/image1.png)
 
-![Document Library](docs/image2.png)
-
-![Manual](docs/image3.png)
-
 
 ## 🌐 Live Demo & Hosting
 

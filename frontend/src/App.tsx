@@ -158,70 +158,179 @@ function App() {
         {currentView === 'chat' && <ChatWindow />}
         {currentView === 'documents' && <DocumentLibrary />}
         
-        {/* REBUILT ARCHITECTURE MANUAL */}
+{/* REBUILT HYBRID ARCHITECTURE MANUAL - MOBILE OPTIMIZED */}
         {currentView === 'instructions' && (
-          <ScrollArea className="flex-1 p-4 sm:p-8 h-full">
-            <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 pb-20">
-              <div className="bg-black/20 p-6 sm:p-8 rounded-3xl backdrop-blur-md border border-white/10 shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+          <ScrollArea className="flex-1 w-full h-full">
+            {/* Moved padding to the inner container, added w-full and min-w-0 */}
+            <div className="p-4 sm:p-8 max-w-4xl mx-auto w-full flex flex-col space-y-6 sm:space-y-8 animate-in fade-in duration-300 pb-20 min-w-0">
+              
+              {/* HERO SECTION */}
+              <div className="bg-black/20 p-5 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-md border border-white/10 shadow-lg relative overflow-hidden w-full break-words">
+                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none hidden sm:block">
                   <BookOpen className="w-48 h-48" />
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3 drop-shadow-md relative z-10">
-                  <Database className="w-8 h-8 text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
-                  Architecture Manual
+                <h2 className="text-xl sm:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3 drop-shadow-md relative z-10 flex-wrap">
+                  <Database className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)] shrink-0" />
+                  <span>Platform Architecture Manual</span>
                 </h2>
-                <p className="text-blue-100/70 mt-3 font-medium max-w-2xl relative z-10 text-sm sm:text-base">
+                <p className="text-blue-100/70 mt-3 font-medium max-w-2xl relative z-10 text-sm sm:text-base leading-relaxed">
                   ShriRAGx is a secure, multi‑tenant, production‑grade RAG architecture with autonomous agentic orchestration. 
                   This manual outlines the core engineering principles powering your secure session.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 border border-purple-500/30">
+              {/* HIGH-LEVEL GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
+                <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors w-full min-w-0 flex flex-col">
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-3 sm:mb-4 border border-purple-500/30 shrink-0">
                     <Activity className="w-5 h-5 text-purple-400 drop-shadow-md" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Agentic Orchestration</h3>
-                  <p className="text-sm text-blue-100/70 leading-relaxed">
-                    Powered by LangGraph, the AI acts as an autonomous agent. It dynamically evaluates queries to either execute SQL for metadata, perform semantic search in ChromaDB, or respond conversationally—drastically reducing hallucinations.
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 break-words">Agentic Orchestration</h3>
+                  <p className="text-xs sm:text-sm text-blue-100/70 leading-relaxed">
+                    Powered by LangGraph, the AI dynamically evaluates queries to execute SQL for metadata, perform semantic search in ChromaDB, or respond conversationally—drastically reducing hallucinations.
                   </p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4 border border-emerald-500/30">
+                <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors w-full min-w-0 flex flex-col">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-3 sm:mb-4 border border-emerald-500/30 shrink-0">
                     <Shield className="w-5 h-5 text-emerald-400 drop-shadow-md" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Zero-Trust Security</h3>
-                  <p className="text-sm text-blue-100/70 leading-relaxed">
-                    Passwords are never sent to the backend. The React UI computes a SHA-256 hash locally via the Web Crypto API. This hash becomes your strict strict environment key for isolated Postgres queries and ChromaDB vector filters.
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 break-words">Zero-Trust Security</h3>
+                  <p className="text-xs sm:text-sm text-blue-100/70 leading-relaxed">
+                    Passwords are never sent to the backend. The React UI computes a SHA-256 hash locally. This hash becomes your strict environment key for isolated Postgres queries and ChromaDB vector filters.
                   </p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 border border-blue-500/30">
+                <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors w-full min-w-0 flex flex-col">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-3 sm:mb-4 border border-blue-500/30 shrink-0">
                     <Database className="w-5 h-5 text-blue-400 drop-shadow-md" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Dual-Layer Storage</h3>
-                  <p className="text-sm text-blue-100/70 leading-relaxed">
-                    The architecture splits responsibilities: ChromaDB natively handles high-dimensional semantic chunks for conceptual search, while PostgreSQL tracks file metadata, upload timestamps, and active toggle states.
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 break-words">Dual-Layer Storage</h3>
+                  <p className="text-xs sm:text-sm text-blue-100/70 leading-relaxed">
+                    The architecture splits responsibilities: ChromaDB natively handles high-dimensional semantic chunks, while PostgreSQL tracks absolute file metadata, upload timestamps, and active toggle states.
                   </p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center mb-4 border border-amber-500/30">
+                <div className="bg-white/5 border border-white/10 p-5 sm:p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors w-full min-w-0 flex flex-col">
+                  <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center mb-3 sm:mb-4 border border-amber-500/30 shrink-0">
                     <Trash2 className="w-5 h-5 text-amber-400 drop-shadow-md" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Resource Protection</h3>
-                  <p className="text-sm text-blue-100/70 leading-relaxed">
-                    Running on constrained Azure nodes, the system prevents Out of Memory (OOM) errors via an APScheduler background worker that garbage-collects documents, chat history, and vectors older than 24 hours.
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 break-words">Resource Protection</h3>
+                  <p className="text-xs sm:text-sm text-blue-100/70 leading-relaxed">
+                    Running on constrained Azure nodes, the system prevents Out of Memory (OOM) errors via an APScheduler worker that garbage-collects data older than 24 hours.
                   </p>
                 </div>
               </div>
+
+              {/* TECHNICAL DEEP DIVE */}
+              <div className="bg-black/30 p-5 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-2xl border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),_0_15px_40px_rgba(0,0,0,0.5)] space-y-8 w-full min-w-0 overflow-hidden">
+                
+                <div className="w-full min-w-0 flex flex-col">
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-3 drop-shadow-sm flex items-start sm:items-center gap-2">
+                    <Activity className="w-5 h-5 text-blue-400 mt-0.5 sm:mt-0 shrink-0" />
+                    <span className="break-words">1. Separation of Concerns</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-blue-50/80 leading-relaxed mb-4 break-words">
+                    The system enforces strict decoupling between data ingestion (Write Path) and agentic reasoning (Read Path) to ensure high concurrency and zero UI blocking.
+                  </p>
+                  <div className="w-full max-w-full overflow-x-auto border border-white/10 bg-white/5 rounded-lg backdrop-blur-sm">
+                    <table className="w-full text-[11px] sm:text-xs text-left min-w-[500px]">
+                      <thead>
+                        <tr className="bg-black/40 border-b border-white/10">
+                          <th className="p-2 sm:p-3 font-semibold text-white/90 whitespace-nowrap">System Path</th>
+                          <th className="p-2 sm:p-3 font-semibold text-white/90 whitespace-nowrap">Execution Context</th>
+                          <th className="p-2 sm:p-3 font-semibold text-white/90 whitespace-nowrap">Primary Objective</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        <tr className="hover:bg-white/5 transition-colors">
+                          <td className="p-2 sm:p-3 font-medium text-white whitespace-nowrap">Write Path</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 whitespace-nowrap">Asynchronous</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 min-w-[200px]">Isolate CPU-heavy extraction and vectorization.</td>
+                        </tr>
+                        <tr className="hover:bg-white/5 transition-colors">
+                          <td className="p-2 sm:p-3 font-medium text-white whitespace-nowrap">Read Path</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 whitespace-nowrap">Real-time Stream</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 min-w-[200px]">Autonomous ReAct evaluation and SSE streaming.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <hr className="border-white/10 w-full" />
+
+                <div className="w-full min-w-0 flex flex-col">
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-3 drop-shadow-sm flex items-start sm:items-center gap-2">
+                    <Database className="w-5 h-5 text-blue-400 mt-0.5 sm:mt-0 shrink-0" />
+                    <span className="break-words">2. Document Pipeline</span>
+                  </h3>
+                  <ol className="list-decimal list-outside ml-4 space-y-2 text-xs sm:text-sm text-blue-50/80 marker:text-blue-400 font-medium w-full pr-2">
+                    <li className="pl-1 break-words"><strong className="text-white">Extraction & Chunking:</strong> Content is split using a boundary of 200 elements.</li>
+                    <li className="pl-1 break-words"><strong className="text-white">Local Edge Vectorization:</strong> Chunks are vectorized bypassing external API costs.</li>
+                    <li className="pl-1 break-words"><strong className="text-white">Dual Commit:</strong> Vectors go to ChromaDB while ACID metadata commits to PostgreSQL.</li>
+                  </ol>
+                </div>
+
+                <hr className="border-white/10 w-full" />
+
+                <div className="w-full min-w-0 flex flex-col">
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-3 drop-shadow-sm flex items-start sm:items-center gap-2">
+                    <Activity className="w-5 h-5 text-blue-400 mt-0.5 sm:mt-0 shrink-0" />
+                    <span className="break-words">3. Agentic Routing Logic</span>
+                  </h3>
+                  <div className="w-full max-w-full overflow-x-auto border border-white/10 bg-white/5 rounded-lg backdrop-blur-sm">
+                    <table className="w-full text-[11px] sm:text-xs text-left min-w-[500px]">
+                      <thead>
+                        <tr className="bg-black/40 border-b border-white/10">
+                          <th className="p-2 sm:p-3 font-semibold text-white/90 whitespace-nowrap">Classification</th>
+                          <th className="p-2 sm:p-3 font-semibold text-white/90 whitespace-nowrap">Trigger Conditions</th>
+                          <th className="p-2 sm:p-3 font-semibold text-white/90 whitespace-nowrap">Assigned Path</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        <tr className="hover:bg-white/5 transition-colors">
+                          <td className="p-2 sm:p-3 font-mono text-blue-300 whitespace-nowrap">Metadata</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 min-w-[200px]">count, how many, recent</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 whitespace-nowrap">System Meta Node</td>
+                        </tr>
+                        <tr className="hover:bg-white/5 transition-colors">
+                          <td className="p-2 sm:p-3 font-mono text-emerald-300 whitespace-nowrap">RAG</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 min-w-[200px]">summarize, what does the file say</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 whitespace-nowrap">Vector Search Node</td>
+                        </tr>
+                        <tr className="hover:bg-white/5 transition-colors">
+                          <td className="p-2 sm:p-3 font-mono text-purple-300 whitespace-nowrap">Conversation</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 min-w-[200px]">hello, who are you</td>
+                          <td className="p-2 sm:p-3 text-blue-50/80 whitespace-nowrap">LLM Generation</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <hr className="border-white/10 w-full" />
+
+                <div className="w-full min-w-0 flex flex-col">
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-3 drop-shadow-sm flex items-start sm:items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-400 mt-0.5 sm:mt-0 shrink-0" />
+                    <span className="break-words">4. Operations Reference</span>
+                  </h3>
+                  <div className="w-full max-w-full bg-black/40 border border-white/10 p-3 sm:p-5 rounded-xl text-[10px] sm:text-xs font-mono text-blue-200/80 space-y-3 shadow-inner overflow-x-auto">
+                    <div className="whitespace-nowrap"><span className="text-slate-400"># Direct Metadata Execution</span><br />&gt; How many files are uploaded right now?<br />&gt; Show a list of all recent documents.</div>
+                    <div className="whitespace-nowrap mt-4"><span className="text-slate-400"># Semantic Generation</span><br />&gt; Summarize the engineering requirements.<br />&gt; Compare the architecture paradigms.</div>
+                  </div>
+                </div>
+
+              </div>
+
             </div>
           </ScrollArea>
         )}
+        
       </main>
 
+      {/* RESTORED RIGHT SIDEBAR */}
       <aside className="w-[320px] bg-black/20 backdrop-blur-2xl hidden lg:flex flex-col border-l border-white/10 relative z-20 shadow-[inset_1px_0_0_rgba(255,255,255,0.05),_-5px_0_30px_rgba(0,0,0,0.5)]">
         <div className="p-4 border-b border-white/10 relative z-10 bg-gradient-to-b from-white/5 to-transparent">
           <h2 className="font-semibold text-sm text-white/95 flex items-center gap-2 drop-shadow-md">
