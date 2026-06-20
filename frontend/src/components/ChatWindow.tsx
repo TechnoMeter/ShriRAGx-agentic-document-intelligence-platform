@@ -62,14 +62,14 @@ export function ChatWindow() {
       <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-black/10 backdrop-blur-sm shrink-0">
         <span className="text-xs font-medium text-white/60 uppercase tracking-wider">Conversation</span>
         <button
-  onClick={handleClearHistory}
-  className="text-white/30 hover:text-red-400 active:text-red-400 p-2 sm:p-1.5 rounded-lg hover:bg-red-500/10 active:bg-red-500/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-  disabled={messages.length === 0}
-  title="Clear chat history (permanent)"
->
-  <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
-  <span className="sr-only">Clear History</span>
-</button>
+          onClick={handleClearHistory}
+          disabled={messages.length === 0}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),_0_0_15px_rgba(239,68,68,0.4)] transition-all"
+          title="Clear chat history (permanent)"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>Clear Chat History</span>
+        </button>
       </div>
 
       {/* ---- Messages (same as before, just moved ScrollArea here) ---- */}
