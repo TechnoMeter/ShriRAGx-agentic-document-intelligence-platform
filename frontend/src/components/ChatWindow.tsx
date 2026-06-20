@@ -6,15 +6,21 @@ import { useChatStream } from '@/hooks/useChatStream';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Trash2, Paperclip, Sparkles, CheckCircle2 } from 'lucide-react';
+import { 
+  Send, Bot, User, Trash2, Paperclip, 
+  Sparkles, CheckCircle2, Activity, ChevronDown, ChevronUp 
+} from 'lucide-react';
 import { DocumentSidebar } from '@/components/DocumentSidebar'; 
 import { api } from '@/lib/api';
 import clsx from 'clsx';
 
 export function ChatWindow() {
   const [input, setInput] = useState('');
+  const [showMobileThoughts, setShowMobileThoughts] = useState(false); // Controls mobile thought accordion
+
   const messages = useChatStore((state) => state.messages);
   const isLoading = useChatStore((state) => state.isLoading);
+  const thoughts = useChatStore((state) => state.thoughts); // Pulled thoughts state
   const pendingPrompt = useChatStore((state) => state.pendingPrompt);
   const setPendingPrompt = useChatStore((state) => state.setPendingPrompt);
   const setView = useChatStore((state) => state.setView);
@@ -27,7 +33,7 @@ export function ChatWindow() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, thoughts]); // Added thoughts to dependency array for smooth scrolling
 
   useEffect(() => {
     if (pendingPrompt && !isLoading) {
@@ -38,6 +44,7 @@ export function ChatWindow() {
 
   const handleSend = () => {
     if (!input.trim() || isLoading || !hasDocuments) return;
+    setShowMobileThoughts(true); // Auto-expand thoughts on new message
     sendMessage(input);
     setInput('');
   };
@@ -156,6 +163,39 @@ export function ChatWindow() {
                 </div>
               </div>
             ))}
+
+            {/* ===== INLINE MOBILE THOUGHT STREAM ===== */}
+            {isLoading && thoughts.length > 0 && (
+              <div className="md:hidden flex gap-3 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-[0_5px_15px_rgba(0,0,0,0.3)] border bg-black/60 border-white/20 text-white">
+                  <Activity className="w-4 h-4 text-emerald-400 animate-pulse drop-shadow-md" />
+                </div>
+                
+                <div className="flex-1 max-w-[85%]">
+                  <button 
+                    onClick={() => setShowMobileThoughts(!showMobileThoughts)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors backdrop-blur-sm"
+                  >
+                    Agent Thinking ({thoughts.length} steps)...
+                    {showMobileThoughts ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
+                  </button>
+
+                  {showMobileThoughts && (
+                    <div className="mt-3 space-y-2 border-l-2 border-white/10 pl-3 ml-1">
+                      {thoughts.map((thought, idx) => (
+                        <div 
+                          key={idx} 
+                          className="bg-black/40 border border-white/5 rounded-md p-2 text-[11px] text-blue-100/70 font-mono shadow-inner animate-in fade-in duration-200"
+                        >
+                          {thought}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
         )}
