@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Send, Bot, User, Trash2, Paperclip, 
-  Sparkles, CheckCircle2, Activity, ChevronDown, ChevronUp 
+  Sparkles, CheckCircle2, Loader2, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { DocumentSidebar } from '@/components/DocumentSidebar'; 
 import { api } from '@/lib/api';
@@ -16,16 +16,17 @@ import clsx from 'clsx';
 
 export function ChatWindow() {
   const [input, setInput] = useState('');
-  const [showMobileThoughts, setShowMobileThoughts] = useState(false); // Controls mobile thought accordion
+  const [isUploading, setIsUploading] = useState(false);
+  const [showMobileThoughts, setShowMobileThoughts] = useState(false); // FIXED: Added missing state
 
   const messages = useChatStore((state) => state.messages);
   const isLoading = useChatStore((state) => state.isLoading);
-  const thoughts = useChatStore((state) => state.thoughts); // Pulled thoughts state
+  const thoughts = useChatStore((state) => state.thoughts); 
   const pendingPrompt = useChatStore((state) => state.pendingPrompt);
   const setPendingPrompt = useChatStore((state) => state.setPendingPrompt);
-  const setView = useChatStore((state) => state.setView);
   const sessionId = useChatStore((state) => state.sessionId);
   const hasDocuments = useChatStore((state) => state.hasDocuments);
+  const setHasDocuments = useChatStore((state) => state.setHasDocuments);
   const clearChat = useChatStore((state) => state.clearChat);
   
   const { sendMessage } = useChatStream();
@@ -33,7 +34,7 @@ export function ChatWindow() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, thoughts]); // Added thoughts to dependency array for smooth scrolling
+  }, [messages, thoughts]);
 
   useEffect(() => {
     if (pendingPrompt && !isLoading) {
@@ -42,11 +43,36 @@ export function ChatWindow() {
     }
   }, [pendingPrompt, isLoading, sendMessage, setPendingPrompt]);
 
+  useEffect(() => {
+    // Auto-expand thoughts while generating, auto-collapse when finished
+    if (isLoading) {
+      setShowMobileThoughts(true);
+    } else {
+      setShowMobileThoughts(false);
+    }
+  }, [isLoading]);
+  
   const handleSend = () => {
     if (!input.trim() || isLoading || !hasDocuments) return;
-    setShowMobileThoughts(true); // Auto-expand thoughts on new message
     sendMessage(input);
     setInput('');
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !sessionId) return;
+
+    setIsUploading(true);
+    try {
+      await api.uploadFile(file, sessionId);
+      setHasDocuments(true);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to upload document.');
+    } finally {
+      setIsUploading(false);
+      event.target.value = ''; // Reset input so the user can upload another file immediately
+    }
   };
 
   const handleClearHistory = async () => {
@@ -124,78 +150,81 @@ export function ChatWindow() {
           </div>
         ) : (
           <div className="space-y-6 pb-32 sm:pb-36">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={clsx(
-                  "flex gap-3 sm:gap-4 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300",
-                  msg.role === 'user' ? "flex-row-reverse" : "flex-row"
-                )}
-              >
-                <div className={clsx(
-                  "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-[0_5px_15px_rgba(0,0,0,0.3)] border",
-                  msg.role === 'user' 
-                    ? "bg-gradient-to-br from-blue-400 to-blue-600 border-blue-300/50 text-white" 
-                    : "bg-gradient-to-br from-slate-200 to-slate-400 border-white/50 text-slate-900"
-                )}>
-                  {msg.role === 'user' ? <User className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" /> : <Bot className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" />}
-                </div>
+            {messages.map((msg, idx) => {
+              const isLatestAssistant = idx === messages.length - 1 && msg.role === 'assistant';
 
-                <div className={clsx(
-                  "px-4 py-3 sm:px-5 sm:py-4 max-w-[85%] sm:max-w-[80%] shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-2xl border",
-                  msg.role === 'user' 
-                    ? "bg-white/15 border-white/30 text-white rounded-2xl rounded-tr-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]" 
-                    : "bg-black/40 border-white/10 text-blue-50/90 rounded-2xl rounded-tl-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]",
-                  msg.isError && "bg-red-900/40 border-red-500/50 text-red-200"
-                )}>
-                  <div className="prose prose-sm md:prose-base prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10 prose-pre:shadow-inner break-words">
-                    {msg.isStreaming ? (
-                      <div className="flex items-center gap-1">
-                        {msg.content}
-                        <span className="w-2.5 h-4 sm:h-5 bg-blue-400 animate-pulse inline-block align-middle ml-1 drop-shadow-[0_0_8px_rgba(96,165,250,0.9)] rounded-sm" />
+              return (
+                <div
+                  key={msg.id}
+                  className={clsx(
+                    "flex gap-3 sm:gap-4 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300",
+                    msg.role === 'user' ? "flex-row-reverse" : "flex-row"
+                  )}
+                >
+                  <div className={clsx(
+                    "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-[0_5px_15px_rgba(0,0,0,0.3)] border",
+                    msg.role === 'user' 
+                      ? "bg-gradient-to-br from-blue-400 to-blue-600 border-blue-300/50 text-white" 
+                      : "bg-gradient-to-br from-slate-200 to-slate-400 border-white/50 text-slate-900"
+                  )}>
+                    {msg.role === 'user' ? <User className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" /> : <Bot className="w-4 h-4 sm:w-5 sm:h-5 drop-shadow-md" />}
+                  </div>
+
+                  <div className={clsx(
+                    "px-4 py-3 sm:px-5 sm:py-4 max-w-[85%] sm:max-w-[80%] shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-2xl border flex flex-col",
+                    msg.role === 'user' 
+                      ? "bg-white/15 border-white/30 text-white rounded-2xl rounded-tr-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]" 
+                      : "bg-black/40 border-white/10 text-blue-50/90 rounded-2xl rounded-tl-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]",
+                    msg.isError && "bg-red-900/40 border-red-500/50 text-red-200"
+                  )}>
+                    
+                    {/* ===== INLINE AGENT TRACING (Only on latest assistant message) ===== */}
+                    {isLatestAssistant && thoughts.length > 0 && (
+<div className="lg:hidden mb-3 border border-white/10 bg-black/20 rounded-lg overflow-hidden transition-all shadow-inner">                        <button
+                          onClick={() => setShowMobileThoughts(!showMobileThoughts)}
+                          className="flex items-center justify-between w-full p-2.5 text-[10px] font-bold text-emerald-400/90 uppercase tracking-widest hover:bg-white/5 transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            {isLoading ? (
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_5px_rgba(52,211,153,0.8)]" />
+                            ) : (
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            )}
+                            Agent Tracing ({thoughts.length})
+                          </span>
+                          {showMobileThoughts ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        </button>
+                        
+                        {showMobileThoughts && (
+                          <div className="p-3 space-y-2 border-t border-white/10 bg-black/40">
+                            {thoughts.map((thought, tIdx) => (
+                              <div key={tIdx} className="text-[11px] text-blue-100/70 font-mono animate-in fade-in duration-200">
+                                {thought}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content || ' '}
-                      </ReactMarkdown>
                     )}
+
+                    {/* ===== MESSAGE CONTENT ===== */}
+                    <div className="prose prose-sm md:prose-base prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10 prose-pre:shadow-inner break-words">
+                      {msg.isStreaming ? (
+                        <div className="flex items-center gap-1">
+                          {msg.content}
+                          <span className="w-2.5 h-4 sm:h-5 bg-blue-400 animate-pulse inline-block align-middle ml-1 drop-shadow-[0_0_8px_rgba(96,165,250,0.9)] rounded-sm" />
+                        </div>
+                      ) : (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content || ' '}
+                        </ReactMarkdown>
+                      )}
+                    </div>
+
                   </div>
                 </div>
-              </div>
-            ))}
-
-            {/* ===== INLINE MOBILE THOUGHT STREAM ===== */}
-            {isLoading && thoughts.length > 0 && (
-              <div className="md:hidden flex gap-3 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-[0_5px_15px_rgba(0,0,0,0.3)] border bg-black/60 border-white/20 text-white">
-                  <Activity className="w-4 h-4 text-emerald-400 animate-pulse drop-shadow-md" />
-                </div>
-                
-                <div className="flex-1 max-w-[85%]">
-                  <button 
-                    onClick={() => setShowMobileThoughts(!showMobileThoughts)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors backdrop-blur-sm"
-                  >
-                    Agent Thinking ({thoughts.length} steps)...
-                    {showMobileThoughts ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
-                  </button>
-
-                  {showMobileThoughts && (
-                    <div className="mt-3 space-y-2 border-l-2 border-white/10 pl-3 ml-1">
-                      {thoughts.map((thought, idx) => (
-                        <div 
-                          key={idx} 
-                          className="bg-black/40 border border-white/5 rounded-md p-2 text-[11px] text-blue-100/70 font-mono shadow-inner animate-in fade-in duration-200"
-                        >
-                          {thought}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -208,21 +237,34 @@ export function ChatWindow() {
             ? "border-amber-400/50 shadow-[0_0_30px_rgba(245,158,11,0.15)] focus-within:bg-white/15 focus-within:border-amber-400" 
             : "border-white/20 shadow-[0_10px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.3)] focus-within:bg-white/20 focus-within:border-blue-400/50"
         )}>
-          <button
-            onClick={() => setView('documents')}
+          
+          <label
             className={clsx(
-              "md:hidden h-10 w-10 flex items-center justify-center shrink-0 rounded-full transition-all relative",
+              "md:hidden h-10 w-10 flex items-center justify-center shrink-0 rounded-full transition-all relative cursor-pointer",
               hasDocuments === false 
                 ? "text-white bg-gradient-to-br from-amber-400 to-amber-600 shadow-[0_0_20px_rgba(245,158,11,0.8)] animate-pulse border border-white/40" 
                 : "text-white/50 hover:text-white hover:bg-white/10"
             )}
             title="Upload Document"
           >
-            <Paperclip className={clsx("w-5 h-5", hasDocuments === false && "drop-shadow-md")} />
-            {hasDocuments === false && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-black rounded-full" />
+            {isUploading ? (
+               <Loader2 className="w-5 h-5 animate-spin drop-shadow-md text-white" />
+            ) : (
+               <>
+                 <Paperclip className={clsx("w-5 h-5", hasDocuments === false && "drop-shadow-md")} />
+                 {hasDocuments === false && (
+                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 border-2 border-black rounded-full" />
+                 )}
+               </>
             )}
-          </button>
+            <input 
+              type="file" 
+              className="hidden" 
+              onChange={handleFileUpload} 
+              accept=".txt,.pdf,.md,.docx,.xlsx,.pptx,.csv,.json,.html,.xml,.epub,.odt,.rtf" 
+              disabled={isUploading}
+            />
+          </label>
 
           <Input
             value={input}

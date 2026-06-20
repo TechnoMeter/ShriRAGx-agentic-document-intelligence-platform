@@ -5,7 +5,7 @@ import { DocumentSidebar } from '@/components/DocumentSidebar';
 import { DocumentLibrary } from '@/components/DocumentLibrary';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore } from '@/store/chatStore';
-import { Database, MessageSquare, BookOpen, Menu, X, LogOut, Activity } from 'lucide-react';
+import { Database, MessageSquare, BookOpen, Menu, X, LogOut, Activity, Shield, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Login } from '@/components/Login';
 import { api } from '@/lib/api';
@@ -13,7 +13,6 @@ import { api } from '@/lib/api';
 function App() {
   const {
     currentView, setView, isMobileMenuOpen, setMobileMenuOpen,
-    isMobileThoughtsOpen, setMobileThoughtsOpen, thoughts,
     sessionId, username, setSession, logout, setMessages, addMessage,
     setHasDocuments
   } = useChatStore();
@@ -71,24 +70,14 @@ function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setMobileThoughtsOpen(!isMobileThoughtsOpen)}
-            className="text-white p-2 hover:bg-white/10 rounded-md transition-colors relative"
-            title="Agent Trace"
-          >
-            <Activity className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)]" />
-            {thoughts.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-400 rounded-full animate-pulse border border-black" />
-            )}
-          </button>
           
           <button 
             onClick={logout}
-            className="flex items-center justify-center w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),_0_0_15px_rgba(239,68,68,0.4)] transition-all"
+            className="flex items-center justify-center w-auto px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),_0_0_15px_rgba(239,68,68,0.4)] transition-all"
             title="Logout"
           >
             <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1 text-xs font-medium">Logout</span>
+            <span className="ml-1 text-xs font-medium">Logout</span>
           </button>
 
           <button 
@@ -102,26 +91,6 @@ function App() {
 
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
-      )}
-
-      {isMobileThoughtsOpen && (
-        <div className="fixed inset-0 z-[60] flex flex-col md:hidden animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileThoughtsOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 h-[65vh] bg-[#051B2C] border-t border-white/10 rounded-t-3xl flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-full duration-300">
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/20 rounded-t-3xl">
-              <h2 className="font-semibold text-sm text-white/95 flex items-center gap-2 drop-shadow-md">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] animate-pulse border border-white/40"></span>
-                Agent Orchestration Trace
-              </h2>
-              <button onClick={() => setMobileThoughtsOpen(false)} className="text-white/50 hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <ScrollArea className="flex-1 bg-gradient-to-b from-transparent to-black/20">
-              <ThoughtStream />
-            </ScrollArea>
-          </div>
-        </div>
       )}
       
       <aside className={cn(
@@ -160,21 +129,21 @@ function App() {
                 Navigation
               </div>
               <button 
-                onClick={() => setView('chat')}
+                onClick={() => { setView('chat'); setMobileMenuOpen(false); }}
                 className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all text-sm font-medium border ${currentView === 'chat' ? 'bg-white/20 border-white/30 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),_0_4px_15px_rgba(0,0,0,0.3)]' : 'border-transparent hover:bg-white/10 hover:border-white/20 text-white/70 hover:text-white'}`}
               >
                 <MessageSquare className="w-4 h-4" />
                 Context Agent Chat
               </button>
               <button 
-                onClick={() => setView('documents')}
+                onClick={() => { setView('documents'); setMobileMenuOpen(false); }}
                 className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all text-sm font-medium border ${currentView === 'documents' ? 'bg-white/20 border-white/30 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),_0_4px_15px_rgba(0,0,0,0.3)]' : 'border-transparent hover:bg-white/10 hover:border-white/20 text-white/70 hover:text-white'}`}
               >
                 <Database className="w-4 h-4" />
                 Document Library
               </button>
               <button 
-                onClick={() => setView('instructions')}
+                onClick={() => { setView('instructions'); setMobileMenuOpen(false); }}
                 className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all text-sm font-medium border ${currentView === 'instructions' ? 'bg-white/20 border-white/30 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),_0_4px_15px_rgba(0,0,0,0.3)]' : 'border-transparent hover:bg-white/10 hover:border-white/20 text-white/70 hover:text-white'}`}
               >
                 <BookOpen className="w-4 h-4" />
@@ -188,7 +157,69 @@ function App() {
       <main className="flex-1 flex flex-col min-w-0 bg-transparent relative z-10 overflow-hidden">
         {currentView === 'chat' && <ChatWindow />}
         {currentView === 'documents' && <DocumentLibrary />}
-        {/* Omitting instructions manual static HTML block to save character space... Leave it exactly as it was */}
+        
+        {/* REBUILT ARCHITECTURE MANUAL */}
+        {currentView === 'instructions' && (
+          <ScrollArea className="flex-1 p-4 sm:p-8 h-full">
+            <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 pb-20">
+              <div className="bg-black/20 p-6 sm:p-8 rounded-3xl backdrop-blur-md border border-white/10 shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                  <BookOpen className="w-48 h-48" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3 drop-shadow-md relative z-10">
+                  <Database className="w-8 h-8 text-blue-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.8)]" />
+                  Architecture Manual
+                </h2>
+                <p className="text-blue-100/70 mt-3 font-medium max-w-2xl relative z-10 text-sm sm:text-base">
+                  ShriRAGx is a secure, multi‑tenant, production‑grade RAG architecture with autonomous agentic orchestration. 
+                  This manual outlines the core engineering principles powering your secure session.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 border border-purple-500/30">
+                    <Activity className="w-5 h-5 text-purple-400 drop-shadow-md" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Agentic Orchestration</h3>
+                  <p className="text-sm text-blue-100/70 leading-relaxed">
+                    Powered by LangGraph, the AI acts as an autonomous agent. It dynamically evaluates queries to either execute SQL for metadata, perform semantic search in ChromaDB, or respond conversationally—drastically reducing hallucinations.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4 border border-emerald-500/30">
+                    <Shield className="w-5 h-5 text-emerald-400 drop-shadow-md" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Zero-Trust Security</h3>
+                  <p className="text-sm text-blue-100/70 leading-relaxed">
+                    Passwords are never sent to the backend. The React UI computes a SHA-256 hash locally via the Web Crypto API. This hash becomes your strict strict environment key for isolated Postgres queries and ChromaDB vector filters.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 border border-blue-500/30">
+                    <Database className="w-5 h-5 text-blue-400 drop-shadow-md" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Dual-Layer Storage</h3>
+                  <p className="text-sm text-blue-100/70 leading-relaxed">
+                    The architecture splits responsibilities: ChromaDB natively handles high-dimensional semantic chunks for conceptual search, while PostgreSQL tracks file metadata, upload timestamps, and active toggle states.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 p-6 rounded-2xl shadow-inner backdrop-blur-sm hover:bg-white/10 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center mb-4 border border-amber-500/30">
+                    <Trash2 className="w-5 h-5 text-amber-400 drop-shadow-md" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Resource Protection</h3>
+                  <p className="text-sm text-blue-100/70 leading-relaxed">
+                    Running on constrained Azure nodes, the system prevents Out of Memory (OOM) errors via an APScheduler background worker that garbage-collects documents, chat history, and vectors older than 24 hours.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+        )}
       </main>
 
       <aside className="w-[320px] bg-black/20 backdrop-blur-2xl hidden lg:flex flex-col border-l border-white/10 relative z-20 shadow-[inset_1px_0_0_rgba(255,255,255,0.05),_-5px_0_30px_rgba(0,0,0,0.5)]">
