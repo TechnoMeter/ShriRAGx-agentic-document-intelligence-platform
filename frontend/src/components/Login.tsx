@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import { Database, Shield, Clock, Info, Eye, EyeOff, Loader2 } from 'lucide-react';
-
-// Mocking the chat store so the component compiles successfully in a standalone preview environment.
-// In your actual app, you can replace this with: import { useChatStore } from '@/store/chatStore';
-const useChatStore = (selector: any) => {
-  return selector({
-    setSessionId: (id: string) => console.log('Mock Session ID set:', id)
-  });
-};
+import { useChatStore } from '@/store/chatStore'; 
 
 async function hashCredentials(username: string, password: string): Promise<string> {
   const combined = username + password;
