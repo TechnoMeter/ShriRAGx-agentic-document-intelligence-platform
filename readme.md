@@ -18,7 +18,7 @@
   
   <br><br>
   
-<h1>Agentic Document Intelligence Platform</h1>
+<h1>ShriRAGx: An Agentic Document Intelligence Platform</h1>
   <p><strong>A secure, multi‑tenant, production‑grade RAG architecture with autonomous agentic orchestration.</strong></p>
 </div>
 
