@@ -477,7 +477,7 @@ All tests are designed to run in CI/CD pipelines (GitHub Actions, etc.) and ensu
 * **Pessimistic Locking:** Add transaction locks in PostgreSQL for the `is_active` toggle to prevent race conditions when multiple admins modify context simultaneously.
 * **OAuth2 Authentication:** Integrate standard JWT/OAuth flows to create multi-tenant workspaces with granular permissions on document visibility.
 * **OpenTelemetry:** Add distributed tracing across the FastAPI gateway, LangGraph orchestrator, and Gemini API to identify bottlenecks in the reasoning loop visually.
-* **Advanced Chat Library:** Implement pagination, full‑text search across chat history, export conversations (PDF/JSON), and conversation tagging. This will enable users to quickly retrieve past interactions, share insights, and manage large volumes of chat data efficiently.
+* **Per‑File Chat Sessions:** Enable users to create isolated chat sessions tied to specific documents. Each session maintains its own conversation history and agent memory, allowing focused, context‑aware discussions without interference from other files.
 * **Admin Dashboard:** Build a secure admin interface to monitor active sessions, document counts, and system health metrics in real-time.
 
 ## Copyright
