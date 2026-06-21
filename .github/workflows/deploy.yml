@@ -59,7 +59,15 @@ jobs:
             else
               echo "WARNING: frontend/dist not found. Using existing dist if present."
             fi
+            
+            # 1. Stop existing containers
             sudo docker compose down
+            
+            # 2. Rebuild and restart the platform
             sudo docker compose up --build -d
-            sudo docker image prune -f
+            
+            # 3. Aggressively clean up all leftover build cache and old images
+            echo "Running post-deployment Docker cleanup..."
+            sudo docker system prune -af --volumes
+            
             echo "Deployment finished successfully."
