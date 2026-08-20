@@ -18,7 +18,7 @@
   
   <br><br>
   
-<h1>ShriRAGx: An Agentic Document Intelligence Platform</h1>
+  <h1>ShriRAGx: An Agentic Document Intelligence Platform</h1>
   <p><strong>A secure, multi‑tenant, production‑grade RAG architecture with autonomous agentic orchestration.</strong></p>
 </div>
 
@@ -396,7 +396,7 @@ To provision a free SSL certificate via Let's Encrypt, you cannot use a raw IP a
 2. Click on the **Public IP address** located in the *Essentials* section.
 3. Navigate to **Configuration** (under Settings).
 4. Enter your preferred domain prefix in the **DNS name label** text box.
-5. Click **Save**. Your domain is now formally registered (e.g., `[https://shriram-agentic-rag.austriaeast.cloudapp.azure.com/](https://shriram-agentic-rag.austriaeast.cloudapp.azure.com/)`).
+5. Click **Save**. Your domain is now formally registered (e.g., `https://<YOUR_AZURE_DOMAIN>`).
 
 ### 6. Configure Reverse Proxy & SSL (Caddy)
 To secure the application with HTTPS and allow the secure internal Docker user (`appuser`) to write the ChromaDB SQLite database to the host machine:
@@ -411,7 +411,7 @@ To secure the application with HTTPS and allow the secure internal Docker user (
    ```
    Paste the following, ensuring you replace the domain with your actual Azure or custom URL:
    ```text
-   shriram-agentic-rag.austriaeast.cloudapp.azure.com {
+   <YOUR_AZURE_DOMAIN> {
        reverse_proxy app:8000
    }
    ```
@@ -509,6 +509,8 @@ This platform was explicitly optimized to run reliably within a resource-constra
 * **OpenTelemetry:** Add distributed tracing across the FastAPI gateway, LangGraph orchestrator, and Gemini API to identify bottlenecks in the reasoning loop visually.
 * **Per‑File Chat Sessions:** Enable users to create isolated chat sessions tied to specific documents. Each session maintains its own conversation history and agent memory, allowing focused, context‑aware discussions without interference from other files.
 * **Admin Dashboard:** Build a secure admin interface to monitor active sessions, document counts, and system health metrics in real-time.
+
+---
 
 ## Copyright
 **Copyright (c) 2026 [Shriram Govindarajan](https://shriram.is-a.dev). All Rights Reserved.** This repository is available for review purposes only in connection with job applications. No license is granted to use, copy, distribute, or modify this code.
